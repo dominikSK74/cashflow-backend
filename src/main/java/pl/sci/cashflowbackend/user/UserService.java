@@ -4,6 +4,8 @@ import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import pl.sci.cashflowbackend.user.dto.UserDetailsDto;
+import pl.sci.cashflowbackend.user.dto.UserDetailsDtoMapper;
 import pl.sci.cashflowbackend.user.dto.UserDto;
 
 import java.util.Optional;
@@ -54,5 +56,18 @@ public class UserService {
         }else{
             return false;
         }
+    }
+
+    public String getUserRoleByEmail(String email){
+        Optional<User> user = userRepository.findUserByEmail(email);
+        if(user.isPresent()){
+            return user.get().getRole().toString();
+        }
+        return null;
+    }
+
+    public Optional<UserDetailsDto> findUserDetailsByEmail(String email){
+
+        return userRepository.findUserByEmail(email).map(UserDetailsDtoMapper::map);
     }
 }
