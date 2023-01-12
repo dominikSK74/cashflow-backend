@@ -46,10 +46,5 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK).body(jwt.generateToken(userDto.getEmail()));
     }
 
-    //TODO: Logowanie użytkownika i security
-    //      Security Config
-    //      CustomInMemoryUserDetails
-    //      Cors Config
-    //      JWT token
-    //      User Authentication
+    //TODO: Połączyć backend z frontend
 }
