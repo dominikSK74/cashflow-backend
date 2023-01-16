@@ -67,7 +67,14 @@ public class UserService {
     }
 
     public Optional<UserDetailsDto> findUserDetailsByEmail(String email){
-
         return userRepository.findUserByEmail(email).map(UserDetailsDtoMapper::map);
+    }
+
+    public String findUserIdByUsername(String username){
+        Optional<User> user = userRepository.findUserByEmail(username);
+        if(user.isPresent()){
+            return user.get().getId();
+        }
+        return null;
     }
 }

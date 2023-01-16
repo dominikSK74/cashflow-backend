@@ -26,7 +26,7 @@ public class UserController {
     }
 
     @PostMapping("/api/user/register")
-    ResponseEntity<?> register(@RequestBody UserDto userDto){
+    public ResponseEntity<?> register(@RequestBody UserDto userDto){
         if(userService.registerUser(userDto)){
             return ResponseEntity.status(HttpStatus.CREATED).build();
         }else{

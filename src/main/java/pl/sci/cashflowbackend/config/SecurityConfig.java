@@ -10,6 +10,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import pl.sci.cashflowbackend.jwt.JwtFilter;
+import pl.sci.cashflowbackend.user.Role;
 
 @Configuration
 class SecurityConfig{
@@ -26,6 +27,7 @@ class SecurityConfig{
                 .authorizeHttpRequests()
                 .requestMatchers(HttpMethod.POST, "/api/user/register").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/user/login").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/category/get-all").authenticated()
                 .anyRequest()
                 .authenticated()
                 .and().csrf().disable()

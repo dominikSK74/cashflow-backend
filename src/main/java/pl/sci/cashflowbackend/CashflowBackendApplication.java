@@ -34,8 +34,10 @@ public class CashflowBackendApplication {
 //        repo.insert(cat4);
 //
 //        PrivateCategories priv1 = new PrivateCategories("63752e607dd3a55eaf5636d5", "Paliwo");
+//        PrivateCategories priv2 = new PrivateCategories("63c58136caa33a640df3acf9", "Tytoń");
 //
 //        repo2.insert(priv1);
+//        repo2.insert(priv2);
 
 
 
