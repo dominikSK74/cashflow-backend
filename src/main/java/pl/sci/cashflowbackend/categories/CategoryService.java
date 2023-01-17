@@ -38,4 +38,10 @@ public class CategoryService {
 
         return list;
     }
+
+    void addNewPrivateCategory(String categoryName, String username){
+        String userId = userService.findUserIdByUsername(username);
+        PrivateCategories privateCategories = new PrivateCategories(userId, categoryName);
+        privateCategoriesRepository.insert(privateCategories);
+    }
 }

@@ -2,9 +2,8 @@ package pl.sci.cashflowbackend.categories;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import pl.sci.cashflowbackend.categories.dto.NewPrivateCategoryDto;
 import pl.sci.cashflowbackend.jwt.Jwt;
 
 import java.util.ArrayList;
@@ -26,5 +25,14 @@ public class CategoryController {
         String bearer = token.substring(7);
         String username = jwt.extractUsername(bearer);
         return ResponseEntity.status(HttpStatus.OK).body(categoryService.getAllCategories(username));
+    }
+
+    @PostMapping("/api/category/add-private-category")
+    public ResponseEntity<?> addPrivateCategory(@RequestHeader("Authorization") String token,
+                                                @RequestBody NewPrivateCategoryDto dto){
+        String bearer = token.substring(7);
+        String username = jwt.extractUsername(bearer);
+        categoryService.addNewPrivateCategory(dto.getName(), username);
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 }
