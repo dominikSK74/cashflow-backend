@@ -29,6 +29,7 @@ class SecurityConfig{
                 .requestMatchers(HttpMethod.POST, "/api/user/login").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/category/get-all").authenticated()
                 .requestMatchers(HttpMethod.POST, "/api/category/add-private-category").authenticated()
+                .requestMatchers(HttpMethod.POST, "/api/expenses/add").authenticated()
                 .anyRequest()
                 .authenticated()
                 .and().csrf().disable()
