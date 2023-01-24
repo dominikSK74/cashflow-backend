@@ -20,5 +20,16 @@ public class Expenses {
     @NotNull
     private BigDecimal cost;
     @NotNull
+    private String name;
+    @NotNull
     private LocalDate date;
+
+    public Expenses(String userId, String categoryId, String privateCategoryId, BigDecimal cost, String name, LocalDate date) {
+        this.userId = userId;
+        this.categoryId = categoryId;
+        this.privateCategoryId = privateCategoryId;
+        this.cost = cost;
+        this.name = name;
+        this.date = date;
+    }
 }

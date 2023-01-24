@@ -29,12 +29,10 @@ public class ExpensesController {
         String bearer = token.substring(7);
         String username = jwt.extractUsername(bearer);
 
-        expensesService.addExpenses(username, dtoList);
-
-//        dtoList.forEach(x->{
-//            System.out.println(x.toString());
-//        });
-
-        return ResponseEntity.status(HttpStatus.OK).build();
+        if(expensesService.addExpenses(username, dtoList)){
+            return ResponseEntity.status(HttpStatus.OK).build();
+        }else{
+            return ResponseEntity.status(HttpStatus.CONFLICT).build();
+        }
     }
 }

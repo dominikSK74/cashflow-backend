@@ -5,6 +5,7 @@ import pl.sci.cashflowbackend.user.UserService;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class CategoryService {
@@ -43,5 +44,21 @@ public class CategoryService {
         String userId = userService.findUserIdByUsername(username);
         PrivateCategories privateCategories = new PrivateCategories(userId, categoryName);
         privateCategoriesRepository.insert(privateCategories);
+    }
+
+    public String findCategoryIdByCategoryName(String name){
+        Optional<Categories> category = categoriesRepository.findCategoriesByName(name);
+        if(category.isPresent()){
+            return category.get().getId();
+        }
+      return "0";
+    }
+
+    public String findPrivateCategoryIdByPrivateCategoryName(String name){
+        Optional<PrivateCategories> privateCategory = privateCategoriesRepository.findPrivateCategoriesByName(name);
+        if(privateCategory.isPresent()){
+            return privateCategory.get().getId();
+        }
+        return "0";
     }
 }
