@@ -34,7 +34,7 @@ public class ExpensesService {
         listDto.forEach(element -> {
             String categoryId = categoryService.findCategoryIdByCategoryName(element.getCategories());
             String privateCategoryId = categoryService.findPrivateCategoryIdByPrivateCategoryName(element.getCategories());
-            LocalDate date = LocalDate.parse(element.getDate(), formatter);
+            LocalDate date = LocalDate.parse(element.getDate(), formatter).plusDays(1);
             BigDecimal cost = new BigDecimal(element.getCost());
             String name = element.getName();
 

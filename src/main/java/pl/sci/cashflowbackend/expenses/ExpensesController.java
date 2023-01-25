@@ -24,7 +24,7 @@ public class ExpensesController {
     }
 
     @PostMapping("/api/expenses/add")
-    public ResponseEntity<?> addPrivateCategory(@RequestHeader("Authorization") String token,
+    public ResponseEntity<?> addExpenses(@RequestHeader("Authorization") String token,
                                                 @RequestBody ArrayList<ExpensesDto> dtoList){
         String bearer = token.substring(7);
         String username = jwt.extractUsername(bearer);
