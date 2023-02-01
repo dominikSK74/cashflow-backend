@@ -1,5 +1,7 @@
 package pl.sci.cashflowbackend.expenses;
 
+import net.sourceforge.tess4j.Tesseract;
+import net.sourceforge.tess4j.TesseractException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -8,6 +10,8 @@ import org.springframework.web.multipart.MultipartFile;
 import pl.sci.cashflowbackend.expenses.dto.ExpensesDto;
 import pl.sci.cashflowbackend.jwt.Jwt;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.ArrayList;
 
@@ -39,10 +43,20 @@ public class ExpensesController {
     public ResponseEntity<?> uploadImage(@RequestHeader("Authorization") String token,
                                          @RequestParam("image") MultipartFile file) throws IOException {
 
-        System.out.println(token);
-        System.out.println(file.getName());
-        System.out.println(file.getSize());
-        System.out.println(file.getContentType());
+        BufferedImage bufferedImage = ImageIO.read(file.getInputStream());
+        Tesseract tesseract = new Tesseract();
+        tesseract.setDatapath("D:\\CashFlow\\cashflow-backend\\src\\main\\resources\\tessdata-main");
+        tesseract.setLanguage("pol");
+
+        try {
+            String text = tesseract.doOCR(bufferedImage);
+            System.out.println(text);
+        } catch (TesseractException e) {
+            throw new RuntimeException(e);
+        }
+
+        //TODO: Logika zapisywania cen kategori daty i odsyłania do frontu;
+        //      Zmienne do biblioteki tesseract umieścić w properties;
 
         return ResponseEntity.status(HttpStatus.OK).build();
     }
