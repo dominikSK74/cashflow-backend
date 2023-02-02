@@ -2,6 +2,15 @@ package pl.sci.cashflowbackend.expenses;
 
 import net.sourceforge.tess4j.Tesseract;
 import net.sourceforge.tess4j.TesseractException;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.mime.MultipartEntityBuilder;
+import org.apache.http.entity.mime.content.FileBody;
+import org.apache.http.entity.mime.content.InputStreamBody;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -12,6 +21,7 @@ import pl.sci.cashflowbackend.jwt.Jwt;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 
@@ -41,38 +51,30 @@ public class ExpensesController {
 
     @PostMapping("/api/expenses/upload-image")
     public ResponseEntity<?> uploadImage(@RequestHeader("Authorization") String token,
-                                         @RequestParam("image") MultipartFile file) throws IOException {
+                                         @RequestParam("image") MultipartFile file) throws Exception {
 
-        BufferedImage bufferedImage = ImageIO.read(file.getInputStream());
-        Tesseract tesseract = new Tesseract();
-        tesseract.setDatapath("D:\\CashFlow\\cashflow-backend\\src\\main\\resources\\tessdata-main");
-        tesseract.setLanguage("pol");
+        String ocrApi = "https://ocr.asprise.com/api/v1/receipt";
 
-        try {
-            String text = tesseract.doOCR(bufferedImage);
-            System.out.println(text);
-        } catch (TesseractException e) {
-            throw new RuntimeException(e);
+        try(CloseableHttpClient client = HttpClients.createDefault()){
+            HttpPost post = new HttpPost(ocrApi);
+            post.setEntity(MultipartEntityBuilder.create()
+                    .addTextBody("api_key", "TEST")
+                    .addTextBody("recognizer", "auto")
+                    .addTextBody("ref_no", "ocr_java_123'")
+                    .addPart("file",
+                            new InputStreamBody(file.getInputStream(),
+                            ContentType.DEFAULT_BINARY,
+                            file.getOriginalFilename()))
+                    .build());
+
+            try (CloseableHttpResponse response = client.execute(post)){
+                System.out.println(EntityUtils.toString(response.getEntity()));
+            }
         }
 
         //TODO: Logika zapisywania cen kategori daty i odsyłania do frontu;
-        //      Zmienne do biblioteki tesseract umieścić w properties;
+        //      Przeniesc do serwisu;
 
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 }
-
-
-
-//    @PostMapping("/upload/image")
-//    public ResponseEntity<ImageUploadResponse> uplaodImage(@RequestParam("image") MultipartFile file)
-//            throws IOException {
-//
-//        imageRepository.save(Image.builder()
-//                .name(file.getOriginalFilename())
-//                .type(file.getContentType())
-//                .image(ImageUtility.compressImage(file.getBytes())).build());
-//        return ResponseEntity.status(HttpStatus.OK)
-//                .body(new ImageUploadResponse("Image uploaded successfully: " +
-//                        file.getOriginalFilename()));
-//    }
