@@ -10,6 +10,8 @@ import pl.sci.cashflowbackend.categories.Categories;
 import pl.sci.cashflowbackend.categories.CategoriesRepository;
 import pl.sci.cashflowbackend.categories.PrivateCategories;
 import pl.sci.cashflowbackend.categories.PrivateCategoriesRepository;
+import pl.sci.cashflowbackend.shops.Shops;
+import pl.sci.cashflowbackend.shops.ShopsRepository;
 
 //exclude={SecurityAutoConfiguration.class}
 @SpringBootApplication
@@ -17,6 +19,14 @@ public class CashflowBackendApplication {
 
     public static void main(String[] args) {
         ConfigurableApplicationContext context = SpringApplication.run(CashflowBackendApplication.class, args);
+
+//        ShopsRepository repo3 = context.getBean(ShopsRepository.class);
+//
+//        Shops lidl = new Shops("lidl");
+//        Shops auchan = new Shops("auchan");
+//
+//        repo3.insert(lidl);
+//        repo3.insert(auchan);
 
 
 //        CategoriesRepository repo = context.getBean(CategoriesRepository.class);

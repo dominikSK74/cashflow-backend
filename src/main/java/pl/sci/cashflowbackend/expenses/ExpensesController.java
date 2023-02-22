@@ -49,27 +49,10 @@ public class ExpensesController {
     public ResponseEntity<?> uploadImage(@RequestHeader("Authorization") String token,
                                          @RequestParam("image") MultipartFile file) throws Exception {
 
-        String ocrApi = "https://ocr.asprise.com/api/v1/receipt";
+        String bearer = token.substring(7);
+        String username = jwt.extractUsername(bearer);
 
-        try(CloseableHttpClient client = HttpClients.createDefault()){
-            HttpPost post = new HttpPost(ocrApi);
-            post.setEntity(MultipartEntityBuilder.create()
-                    .addTextBody("api_key", "TEST")
-                    .addTextBody("recognizer", "auto")
-                    .addTextBody("ref_no", "ocr_java_123'")
-                    .addPart("file",
-                            new InputStreamBody(file.getInputStream(),
-                            ContentType.DEFAULT_BINARY,
-                            file.getOriginalFilename()))
-                    .build());
-
-            try (CloseableHttpResponse response = client.execute(post)){
-                System.out.println(EntityUtils.toString(response.getEntity()));
-            }
-        }
-
-        //TODO: Logika zapisywania cen kategori daty i odsyłania do frontu;
-        //      Przeniesc do serwisu;
+        expensesService.uploadImage(file, username);
 
         return ResponseEntity.status(HttpStatus.OK).build();
     }
