@@ -13,6 +13,7 @@ import pl.sci.cashflowbackend.user.UserService;
 import javax.imageio.ImageIO;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -76,15 +77,23 @@ public class ExpensesService {
         ArrayList<String> lines = doOCR(file);
         // GET SHOP
         String shop = checkShop(lines);
-
+        LocalDate date = null;
+        ArrayList<Expenses> expensesArrayList = new ArrayList<>();
 
         if(shop.equals("lidl")){
-            lidl(lines);
+            date = getDateFromLidlReceipt(lines);
+            expensesArrayList = lidl(lines);
         }else if(shop.equals("auchan")){
             System.out.println("auchan");
         }else{
-            System.out.println("Return Error");
+            System.out.println("Return Error - sklep nie obslugiwany");
         }
+
+        System.out.println(date);
+        expensesArrayList.forEach( expenses -> {
+            System.out.println("produkt: " + expenses.getName() + " cena: " + expenses.getCost());
+        });
+
     }
 
     public ArrayList<String> doOCR(MultipartFile file) throws IOException{
@@ -124,8 +133,54 @@ public class ExpensesService {
         return null;
     }
 
-    public void lidl(ArrayList<String> lines){
+    public ArrayList<Expenses> lidl(ArrayList<String> lines){
+        ArrayList<Expenses> expensesArrayList = new ArrayList<>();
 
+        // GET PRODUCTS
+        lines.forEach( line -> {
+            if (line.contains("*")) {
+                String[] parts = line.split("\\*");
+                String product = parts[0].replaceAll("[0-9,]+", "");
+
+                String stringNumber = null;
+                if (parts[1].contains("A")){
+                    stringNumber = parts[1].substring(0, parts[1].indexOf("A")).trim();
+                    stringNumber = stringNumber.substring(stringNumber.indexOf(" ") + 1);
+                }else if (parts[1].contains("B")){
+                    stringNumber = parts[1].substring(0, parts[1].indexOf("B")).trim();
+                    stringNumber = stringNumber.substring(stringNumber.indexOf(" ") + 1);
+                }else if (parts[1].contains("C")){
+                    stringNumber = parts[1].substring(0, parts[1].indexOf("C")).trim();
+                    stringNumber = stringNumber.substring(stringNumber.indexOf(" ") + 1);
+                }else if (parts[1].contains("D")){
+                    stringNumber = parts[1].substring(0, parts[1].indexOf("D")).trim();
+                    stringNumber = stringNumber.substring(stringNumber.indexOf(" ") + 1);
+                }else if (parts[1].contains("E")){
+                    stringNumber = parts[1].substring(0, parts[1].indexOf("E")).trim();
+                    stringNumber = stringNumber.substring(stringNumber.indexOf(" ") + 1);
+                }else if (parts[1].contains("F")){
+                    stringNumber = parts[1].substring(0, parts[1].indexOf("F")).trim();
+                    stringNumber = stringNumber.substring(stringNumber.indexOf(" ") + 1);
+                }else if (parts[1].contains("G")){
+                    stringNumber = parts[1].substring(0, parts[1].indexOf("G")).trim();
+                    stringNumber = stringNumber.substring(stringNumber.indexOf(" ") + 1);
+                }
+
+                BigDecimal cost = new BigDecimal(Double.parseDouble(stringNumber.replace(",", ".")))
+                        .setScale(2, RoundingMode.HALF_UP);
+
+//                System.out.println("Produkt: " + product + " cena: " + cost);
+                Expenses expenses = new Expenses();
+                expenses.setName(product);
+                expenses.setCost(cost);
+                expensesArrayList.add(expenses);
+
+            }
+        });
+        return expensesArrayList;
+    }
+
+    public LocalDate getDateFromLidlReceipt(ArrayList<String> lines){
         // GET DATE FROM RECEIPT
         Pattern pattern = Pattern.compile("\\d{4}-\\d{2}-\\d{2}");
         LocalDate date = null;
@@ -136,13 +191,6 @@ public class ExpensesService {
                 date = LocalDate.parse(lines.get(i));
             }
         }
-
-        // GET PRODUCTS
-        lines.forEach( line -> {
-            if (line.contains("*")) {
-                System.out.println(line);
-                //TODO: cena i nazwa
-            }
-        });
+        return date;
     }
 }

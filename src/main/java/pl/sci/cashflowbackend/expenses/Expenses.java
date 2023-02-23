@@ -2,6 +2,7 @@ package pl.sci.cashflowbackend.expenses;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -10,6 +11,7 @@ import java.time.LocalDate;
 
 @Data
 @Document
+@NoArgsConstructor
 public class Expenses {
     @Id
     private String id;
