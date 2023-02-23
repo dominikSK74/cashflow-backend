@@ -8,6 +8,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import pl.sci.cashflowbackend.categories.CategoryService;
 import pl.sci.cashflowbackend.expenses.dto.ExpensesDto;
+import pl.sci.cashflowbackend.expenses.dto.ExpensesDto2;
+import pl.sci.cashflowbackend.products.ProductsService;
 import pl.sci.cashflowbackend.shops.ShopsService;
 import pl.sci.cashflowbackend.user.UserService;
 import javax.imageio.ImageIO;
@@ -16,9 +18,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -29,15 +29,18 @@ public class ExpensesService {
     private CategoryService categoryService;
     private ExpensesRepository expensesRepository;
     private ShopsService shopsService;
+    private ProductsService productsService;
 
     public ExpensesService(UserService userService,
                            CategoryService categoryService,
                            ExpensesRepository expensesRepository,
-                           ShopsService shopsService) {
+                           ShopsService shopsService,
+                           ProductsService productsService) {
         this.userService = userService;
         this.categoryService = categoryService;
         this.expensesRepository = expensesRepository;
         this.shopsService = shopsService;
+        this.productsService = productsService;
     }
 
     boolean addExpenses(String username, ArrayList<ExpensesDto> listDto){
@@ -77,8 +80,8 @@ public class ExpensesService {
         ArrayList<String> lines = doOCR(file);
         // GET SHOP
         String shop = checkShop(lines);
-        LocalDate date = null;
-        ArrayList<Expenses> expensesArrayList = new ArrayList<>();
+        LocalDate date = LocalDate.now();
+        ArrayList<ExpensesDto2> expensesArrayList = new ArrayList<>();
 
         if(shop.equals("lidl")){
             date = getDateFromLidlReceipt(lines);
@@ -89,11 +92,23 @@ public class ExpensesService {
             System.out.println("Return Error - sklep nie obslugiwany");
         }
 
-        System.out.println(date);
-        expensesArrayList.forEach( expenses -> {
-            System.out.println("produkt: " + expenses.getName() + " cena: " + expenses.getCost());
+        // CATEGORY SEARCH
+        expensesArrayList = productsService.getPossibleCategories(expensesArrayList);
+
+        // SET DATE
+        LocalDate finalDate = date;
+        expensesArrayList.forEach(expenses -> {
+            expenses.setDate(finalDate);
         });
 
+        //TODO: ZWROCIC DO FRONTU DTO
+        //      TAM GDZIE KATEGORIA JEST NULL UZYTKOWNIK USTAWIA KATEGORIE Z OFICJALNYCH LUB USTAWIA PRYWATNA
+        //      DODAJEMY EXPENSES DO BAZY
+
+        expensesArrayList.forEach( expenses -> {
+            System.out.println("produkt: " + expenses.getName() + " cena: " + expenses.getCost() + " kategoria: "
+                    + expenses.getCategories() + " data: " + expenses.getDate());
+        });
     }
 
     public ArrayList<String> doOCR(MultipartFile file) throws IOException{
@@ -133,8 +148,8 @@ public class ExpensesService {
         return null;
     }
 
-    public ArrayList<Expenses> lidl(ArrayList<String> lines){
-        ArrayList<Expenses> expensesArrayList = new ArrayList<>();
+    public ArrayList<ExpensesDto2> lidl(ArrayList<String> lines){
+        ArrayList<ExpensesDto2> expensesArrayList = new ArrayList<>();
 
         // GET PRODUCTS
         lines.forEach( line -> {
@@ -142,7 +157,7 @@ public class ExpensesService {
                 String[] parts = line.split("\\*");
                 String product = parts[0].replaceAll("[0-9,]+", "");
 
-                String stringNumber = null;
+                String stringNumber = "0";
                 if (parts[1].contains("A")){
                     stringNumber = parts[1].substring(0, parts[1].indexOf("A")).trim();
                     stringNumber = stringNumber.substring(stringNumber.indexOf(" ") + 1);
@@ -170,7 +185,7 @@ public class ExpensesService {
                         .setScale(2, RoundingMode.HALF_UP);
 
 //                System.out.println("Produkt: " + product + " cena: " + cost);
-                Expenses expenses = new Expenses();
+                ExpensesDto2 expenses = new ExpensesDto2();
                 expenses.setName(product);
                 expenses.setCost(cost);
                 expensesArrayList.add(expenses);

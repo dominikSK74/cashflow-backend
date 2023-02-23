@@ -61,4 +61,12 @@ public class CategoryService {
         }
         return "0";
     }
+
+    public String findCategoryNameById(String id){
+        Optional<Categories> categories = categoriesRepository.findById(id);
+        if(categories.isPresent()){
+            return categories.get().getName();
+        }
+        return "0";
+    }
 }

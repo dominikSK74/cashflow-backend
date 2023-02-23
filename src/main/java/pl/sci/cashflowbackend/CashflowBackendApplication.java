@@ -10,6 +10,8 @@ import pl.sci.cashflowbackend.categories.Categories;
 import pl.sci.cashflowbackend.categories.CategoriesRepository;
 import pl.sci.cashflowbackend.categories.PrivateCategories;
 import pl.sci.cashflowbackend.categories.PrivateCategoriesRepository;
+import pl.sci.cashflowbackend.products.Products;
+import pl.sci.cashflowbackend.products.ProductsRepository;
 import pl.sci.cashflowbackend.shops.Shops;
 import pl.sci.cashflowbackend.shops.ShopsRepository;
 
@@ -19,6 +21,12 @@ public class CashflowBackendApplication {
 
     public static void main(String[] args) {
         ConfigurableApplicationContext context = SpringApplication.run(CashflowBackendApplication.class, args);
+
+//        ProductsRepository repo4 = context.getBean(ProductsRepository.class);
+//        Products mleko = new Products("Wypas. Mleko %  ", "63c0041b6963bd0dc4509251");
+//        repo4.insert(mleko);
+
+
 
 //        ShopsRepository repo3 = context.getBean(ShopsRepository.class);
 //
