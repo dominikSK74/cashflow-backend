@@ -74,7 +74,7 @@ public class ExpensesService {
         return true;
     }
 
-    public void uploadImage(MultipartFile file, String username) throws IOException {
+    public ArrayList<ExpensesDto2> uploadImage(MultipartFile file) throws IOException {
 
         // GET RECEIPT LINES
         ArrayList<String> lines = doOCR(file);
@@ -89,26 +89,24 @@ public class ExpensesService {
         }else if(shop.equals("auchan")){
             System.out.println("auchan");
         }else{
-            System.out.println("Return Error - sklep nie obslugiwany");
+            return null;
         }
 
         // CATEGORY SEARCH
         expensesArrayList = productsService.getPossibleCategories(expensesArrayList);
 
         // SET DATE
-        LocalDate finalDate = date;
+        String finalDate = date.toString();
         expensesArrayList.forEach(expenses -> {
             expenses.setDate(finalDate);
         });
 
-        //TODO: ZWROCIC DO FRONTU DTO
-        //      TAM GDZIE KATEGORIA JEST NULL UZYTKOWNIK USTAWIA KATEGORIE Z OFICJALNYCH LUB USTAWIA PRYWATNA
-        //      DODAJEMY EXPENSES DO BAZY
+//        expensesArrayList.forEach( expenses -> {
+//            System.out.println("produkt: " + expenses.getName() + " cena: " + expenses.getCost() + " kategoria: "
+//                    + expenses.getCategories() + " data: " + expenses.getDate());
+//        });
 
-        expensesArrayList.forEach( expenses -> {
-            System.out.println("produkt: " + expenses.getName() + " cena: " + expenses.getCost() + " kategoria: "
-                    + expenses.getCategories() + " data: " + expenses.getDate());
-        });
+        return expensesArrayList;
     }
 
     public ArrayList<String> doOCR(MultipartFile file) throws IOException{
@@ -184,7 +182,6 @@ public class ExpensesService {
                 BigDecimal cost = new BigDecimal(Double.parseDouble(stringNumber.replace(",", ".")))
                         .setScale(2, RoundingMode.HALF_UP);
 
-//                System.out.println("Produkt: " + product + " cena: " + cost);
                 ExpensesDto2 expenses = new ExpensesDto2();
                 expenses.setName(product);
                 expenses.setCost(cost);

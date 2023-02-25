@@ -1,5 +1,7 @@
 package pl.sci.cashflowbackend.expenses;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import net.sourceforge.tess4j.Tesseract;
 import net.sourceforge.tess4j.TesseractException;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -11,12 +13,15 @@ import org.apache.http.entity.mime.content.InputStreamBody;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import org.springframework.web.multipart.MultipartFile;
 import pl.sci.cashflowbackend.expenses.dto.ExpensesDto;
+import pl.sci.cashflowbackend.expenses.dto.ExpensesDto2;
 import pl.sci.cashflowbackend.jwt.Jwt;
 
 import java.util.ArrayList;
@@ -46,14 +51,26 @@ public class ExpensesController {
     }
 
     @PostMapping("/api/expenses/upload-image")
-    public ResponseEntity<?> uploadImage(@RequestHeader("Authorization") String token,
-                                         @RequestParam("image") MultipartFile file) throws Exception {
+    public ResponseEntity<ArrayList<ExpensesDto2>> uploadImage(@RequestParam("image") MultipartFile file) throws Exception {
 
-        String bearer = token.substring(7);
-        String username = jwt.extractUsername(bearer);
+        ArrayList<ExpensesDto2> expensesDto2ArrayList = expensesService.uploadImage(file);
 
-        expensesService.uploadImage(file, username);
+        if(expensesDto2ArrayList.isEmpty()){
+            return ResponseEntity.status(HttpStatus.CONFLICT).build();
+        }else{
+            ObjectMapper mapper = new ObjectMapper();
+            String json = "";
 
-        return ResponseEntity.status(HttpStatus.OK).build();
+            try {
+                json = mapper.writeValueAsString(expensesDto2ArrayList);
+            } catch (JsonProcessingException e) {
+                e.printStackTrace();
+                return ResponseEntity.status(HttpStatus.CONFLICT).build();
+            }
+
+            HttpHeaders httpHeaders = new HttpHeaders();
+            httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+            return new ResponseEntity<>(expensesDto2ArrayList, httpHeaders, HttpStatus.OK);
+        }
     }
 }
