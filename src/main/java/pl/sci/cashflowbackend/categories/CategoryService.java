@@ -69,4 +69,9 @@ public class CategoryService {
         }
         return "0";
     }
+
+    public boolean categoryIsExistByName(String categoryName){
+        Optional<Categories> categories = categoriesRepository.findCategoriesByName(categoryName);
+        return categories.isPresent();
+    }
 }

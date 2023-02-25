@@ -31,6 +31,7 @@ class SecurityConfig{
                 .requestMatchers(HttpMethod.POST, "/api/category/add-private-category").authenticated()
                 .requestMatchers(HttpMethod.POST, "/api/expenses/add").authenticated()
                 .requestMatchers(HttpMethod.POST, "/api/expenses/upload-image").authenticated()
+                .requestMatchers(HttpMethod.POST, "/api/products/set-category").authenticated()
                 .anyRequest()
                 .authenticated()
                 .and().csrf().disable()
