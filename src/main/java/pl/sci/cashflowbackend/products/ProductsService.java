@@ -1,9 +1,7 @@
 package pl.sci.cashflowbackend.products;
 
 import org.springframework.stereotype.Service;
-import pl.sci.cashflowbackend.categories.Categories;
 import pl.sci.cashflowbackend.categories.CategoryService;
-import pl.sci.cashflowbackend.expenses.Expenses;
 import pl.sci.cashflowbackend.expenses.dto.ExpensesDto2;
 
 import java.util.ArrayList;

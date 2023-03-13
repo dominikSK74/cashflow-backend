@@ -9,6 +9,8 @@ import org.springframework.web.multipart.MultipartFile;
 import pl.sci.cashflowbackend.categories.CategoryService;
 import pl.sci.cashflowbackend.expenses.dto.ExpensesDto;
 import pl.sci.cashflowbackend.expenses.dto.ExpensesDto2;
+import pl.sci.cashflowbackend.expenses.dto.ExpensesGetDataDto;
+import pl.sci.cashflowbackend.jwt.Jwt;
 import pl.sci.cashflowbackend.products.ProductsService;
 import pl.sci.cashflowbackend.shops.ShopsService;
 import pl.sci.cashflowbackend.user.UserService;
@@ -18,7 +20,11 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -30,17 +36,20 @@ public class ExpensesService {
     private ExpensesRepository expensesRepository;
     private ShopsService shopsService;
     private ProductsService productsService;
+    private Jwt jwt;
 
     public ExpensesService(UserService userService,
                            CategoryService categoryService,
                            ExpensesRepository expensesRepository,
                            ShopsService shopsService,
-                           ProductsService productsService) {
+                           ProductsService productsService,
+                           Jwt jwt) {
         this.userService = userService;
         this.categoryService = categoryService;
         this.expensesRepository = expensesRepository;
         this.shopsService = shopsService;
         this.productsService = productsService;
+        this.jwt = jwt;
     }
 
     boolean addExpenses(String username, ArrayList<ExpensesDto> listDto){
@@ -100,11 +109,6 @@ public class ExpensesService {
         expensesArrayList.forEach(expenses -> {
             expenses.setDate(finalDate);
         });
-
-//        expensesArrayList.forEach( expenses -> {
-//            System.out.println("produkt: " + expenses.getName() + " cena: " + expenses.getCost() + " kategoria: "
-//                    + expenses.getCategories() + " data: " + expenses.getDate());
-//        });
 
         return expensesArrayList;
     }
@@ -204,5 +208,45 @@ public class ExpensesService {
             }
         }
         return date;
+    }
+
+    public ExpensesGetDataDto getData(String token, int month, int year){
+
+        String userId = this.userService.findUserIdByUsername(jwt.extractUsername(token.substring(7)));
+        LocalDate start = LocalDate.of(year, month + 1, 1).withDayOfMonth(1);
+        LocalDate end = start.with(TemporalAdjusters.lastDayOfMonth());
+        Map<String, BigDecimal> map = new HashMap<>();
+        ExpensesGetDataDto result = new ExpensesGetDataDto();
+        List<Expenses> list = expensesRepository.findByUserIdAndDateBetween(userId, start, end.plusDays(2));
+        list.forEach(e -> e.setDate(e.getDate().minusDays(1)));
+
+        list.forEach(object -> {
+            String categoryName;
+            if(object.getCategoryId().equals("0")){
+                categoryName = this.categoryService.findPrivateCategoryNameById(object.getPrivateCategoryId());
+            }else {
+                categoryName = this.categoryService.findCategoryNameById(object.getCategoryId());
+            }
+
+            if(map.containsKey(categoryName)){
+                map.put(categoryName,  map.get(categoryName).add(object.getCost()));
+            }else{
+                map.put(categoryName, object.getCost());
+            }
+        });
+
+        String[] categories = new String[map.size()];
+        BigDecimal[] prices = new BigDecimal[map.size()];
+        int index = 0;
+        for(Map.Entry<String, BigDecimal> entry : map.entrySet()){
+            categories[index] = entry.getKey();
+            prices[index] = entry.getValue();
+            index++;
+        }
+
+        result.setCategories(categories);
+        result.setPrices(prices);
+
+        return result;
     }
 }

@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import pl.sci.cashflowbackend.expenses.dto.ExpensesDto;
 import pl.sci.cashflowbackend.expenses.dto.ExpensesDto2;
+import pl.sci.cashflowbackend.expenses.dto.ExpensesGetDataDto;
 import pl.sci.cashflowbackend.jwt.Jwt;
 
 import java.util.ArrayList;
@@ -60,5 +61,18 @@ public class ExpensesController {
             httpHeaders.setContentType(MediaType.APPLICATION_JSON);
             return new ResponseEntity<>(expensesDto2ArrayList, httpHeaders, HttpStatus.OK);
         }
+    }
+
+    @GetMapping("/api/expenses/get-data")
+    public ResponseEntity<ExpensesGetDataDto> getData(@RequestHeader("Authorization") String token,
+                                     @RequestParam("month") int month,
+                                     @RequestParam("year") int year){
+
+        ExpensesGetDataDto result = this.expensesService.getData(token, month, year);
+
+        if(result.checkData()){
+            return ResponseEntity.ok(result);
+        }
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 }

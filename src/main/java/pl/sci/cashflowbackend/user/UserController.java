@@ -45,6 +45,4 @@ public class UserController {
         }
         return ResponseEntity.status(HttpStatus.OK).body(jwt.generateToken(userDto.getEmail()));
     }
-
-    //TODO: Połączyć backend z frontend
 }

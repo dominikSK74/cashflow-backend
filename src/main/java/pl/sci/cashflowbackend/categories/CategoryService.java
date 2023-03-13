@@ -70,6 +70,14 @@ public class CategoryService {
         return "0";
     }
 
+    public String findPrivateCategoryNameById(String id){
+        Optional<PrivateCategories> privateCategories = privateCategoriesRepository.findById(id);
+        if(privateCategories.isPresent()){
+            return privateCategories.get().getName();
+        }
+        return "0";
+    }
+
     public boolean categoryIsExistByName(String categoryName){
         Optional<Categories> categories = categoriesRepository.findCategoriesByName(categoryName);
         return categories.isPresent();
