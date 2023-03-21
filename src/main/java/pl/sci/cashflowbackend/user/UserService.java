@@ -4,6 +4,7 @@ import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import pl.sci.cashflowbackend.settings.SettingsService;
 import pl.sci.cashflowbackend.user.dto.UserDetailsDto;
 import pl.sci.cashflowbackend.user.dto.UserDetailsDtoMapper;
 import pl.sci.cashflowbackend.user.dto.UserDto;
@@ -17,14 +18,18 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
+    private final SettingsService settingsService;
+
     public UserService(
             Validator validator,
             UserRepository userRepository,
-            PasswordEncoder passwordEncoder
+            PasswordEncoder passwordEncoder,
+            SettingsService settingsService
     ) {
         this.validator = validator;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.settingsService = settingsService;
     }
 
     boolean userValidator(User user){
@@ -52,7 +57,11 @@ public class UserService {
         if(userValidator(user) && !emailIsExist(userDto)){
             user.setPassword(passwordEncoder.encode(user.getPassword()));
             userRepository.insert(user);
-            return true;
+
+            if(settingsService.generateDefaultSettings(findUserIdByUsername(userDto.getEmail()))){
+                return true;
+            }
+            return false;
         }else{
             return false;
         }
