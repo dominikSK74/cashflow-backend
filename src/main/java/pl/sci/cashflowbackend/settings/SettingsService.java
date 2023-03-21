@@ -51,4 +51,18 @@ public class SettingsService {
         }
         return null;
     }
+
+    public void setSettings(String userId, GetSettingsDto getSettingsDto){
+        Optional<Settings> settingsOptional = this.settingsRepository.findSettingsByUserId(userId);
+
+        if(settingsOptional.isPresent()){
+            Settings settings = settingsOptional.get();
+            settings.setChartType(getSettingsDto.getChartType());
+            settings.setChartTimeRange(getSettingsDto.getChartTimeRange());
+            settings.setLanguage(getSettingsDto.getLanguage());
+            settings.setTheme(getSettingsDto.getTheme());
+
+            this.settingsRepository.save(settings);
+        }
+    }
 }

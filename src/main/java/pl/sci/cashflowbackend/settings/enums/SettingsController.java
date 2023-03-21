@@ -2,9 +2,7 @@ package pl.sci.cashflowbackend.settings.enums;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import pl.sci.cashflowbackend.jwt.Jwt;
 import pl.sci.cashflowbackend.settings.SettingsService;
 import pl.sci.cashflowbackend.settings.dto.GetSettingsDto;
@@ -30,5 +28,15 @@ public class SettingsController {
 
         String userId = this.userService.findUserIdByUsername(jwt.extractUsername(token.substring(7)));
         return ResponseEntity.ok(this.settingsService.getSettings(userId));
+    }
+
+    @PatchMapping("/api/settings/set-settings")
+    public ResponseEntity<?> setSettings(@RequestHeader("Authorization") String token,
+                                         @RequestBody GetSettingsDto getSettingsDto){
+
+        String userId = this.userService.findUserIdByUsername(jwt.extractUsername(token.substring(7)));
+        this.settingsService.setSettings(userId, getSettingsDto);
+
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 }

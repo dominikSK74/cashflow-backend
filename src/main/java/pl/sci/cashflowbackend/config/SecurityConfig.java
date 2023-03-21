@@ -33,6 +33,7 @@ class SecurityConfig{
                 .requestMatchers(HttpMethod.POST, "/api/expenses/upload-image").authenticated()
                 .requestMatchers(HttpMethod.POST, "/api/products/set-category").authenticated()
                 .requestMatchers(HttpMethod.GET, "/api/settings/get-settings").authenticated()
+                .requestMatchers(HttpMethod.PATCH, "/api/settings/set-settings").authenticated()
                 .anyRequest()
                 .authenticated()
                 .and().csrf().disable()
