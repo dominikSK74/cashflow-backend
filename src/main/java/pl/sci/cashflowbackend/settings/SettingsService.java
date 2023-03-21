@@ -1,6 +1,7 @@
 package pl.sci.cashflowbackend.settings;
 
 import org.springframework.stereotype.Service;
+import pl.sci.cashflowbackend.settings.dto.GetSettingsDto;
 import pl.sci.cashflowbackend.settings.enums.ChartTimeRange;
 import pl.sci.cashflowbackend.settings.enums.ChartType;
 import pl.sci.cashflowbackend.settings.enums.Language;
@@ -34,5 +35,20 @@ public class SettingsService {
             return true;
         }
         return false;
+    }
+
+    public GetSettingsDto getSettings(String userId){
+
+        Optional<Settings> settingsOptional = settingsRepository.findSettingsByUserId(userId);
+
+        if(settingsOptional.isPresent()){
+            return new GetSettingsDto(
+                    settingsOptional.get().getChartType(),
+                    settingsOptional.get().getChartTimeRange(),
+                    settingsOptional.get().getLanguage(),
+                    settingsOptional.get().getTheme()
+                    );
+        }
+        return null;
     }
 }
