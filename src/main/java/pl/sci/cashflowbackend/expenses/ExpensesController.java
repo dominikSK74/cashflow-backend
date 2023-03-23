@@ -88,4 +88,19 @@ public class ExpensesController {
 
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
+
+    @GetMapping("/api/expenses/get-data-day")
+    public ResponseEntity<ExpensesGetDataDto> getDataByMonth(@RequestHeader("Authorization") String token,
+                                                             @RequestParam("day") int day,
+                                                             @RequestParam("month") int month,
+                                                             @RequestParam("year") int year){
+
+        ExpensesGetDataDto result = this.expensesService.getDataByDay(token, day, month, year);
+
+        if(result.checkData()){
+            return ResponseEntity.ok(result);
+        }
+
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
 }
