@@ -210,15 +210,32 @@ public class ExpensesService {
         return date;
     }
 
-    public ExpensesGetDataDto getData(String token, int month, int year){
+    public ExpensesGetDataDto getDataByMonth(String token, int month, int year){
 
         String userId = this.userService.findUserIdByUsername(jwt.extractUsername(token.substring(7)));
         LocalDate start = LocalDate.of(year, month + 1, 1).withDayOfMonth(1);
         LocalDate end = start.with(TemporalAdjusters.lastDayOfMonth());
-        Map<String, BigDecimal> map = new HashMap<>();
-        ExpensesGetDataDto result = new ExpensesGetDataDto();
         List<Expenses> list = expensesRepository.findByUserIdAndDateBetween(userId, start, end.plusDays(2));
         list.forEach(e -> e.setDate(e.getDate().minusDays(1)));
+
+        return getData(list);
+    }
+
+    public ExpensesGetDataDto getDataByYear(String token, int year){
+
+        String userId = this.userService.findUserIdByUsername(jwt.extractUsername(token.substring(7)));
+        LocalDate start = LocalDate.of(year, 1, 1);
+        LocalDate end = LocalDate.of(year, 12, 31);
+        List<Expenses> list = expensesRepository.findByUserIdAndDateBetween(userId, start, end.plusDays(2));
+        list.forEach(e -> e.setDate(e.getDate().minusDays(1)));
+
+        return getData(list);
+    }
+
+
+    public ExpensesGetDataDto getData(List<Expenses> list){
+        Map<String, BigDecimal> map = new HashMap<>();
+        ExpensesGetDataDto result = new ExpensesGetDataDto();
 
         list.forEach(object -> {
             String categoryName;

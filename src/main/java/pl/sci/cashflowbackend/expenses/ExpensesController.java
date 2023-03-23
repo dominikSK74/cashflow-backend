@@ -64,15 +64,28 @@ public class ExpensesController {
     }
 
     @GetMapping("/api/expenses/get-data")
-    public ResponseEntity<ExpensesGetDataDto> getData(@RequestHeader("Authorization") String token,
+    public ResponseEntity<ExpensesGetDataDto> getDataByMonth(@RequestHeader("Authorization") String token,
                                      @RequestParam("month") int month,
                                      @RequestParam("year") int year){
 
-        ExpensesGetDataDto result = this.expensesService.getData(token, month, year);
+        ExpensesGetDataDto result = this.expensesService.getDataByMonth(token, month, year);
 
         if(result.checkData()){
             return ResponseEntity.ok(result);
         }
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
+    @GetMapping("/api/expenses/get-data-year")
+    public ResponseEntity<ExpensesGetDataDto> getDataByYear(@RequestHeader("Authorization") String token,
+                                                      @RequestParam("year") int year){
+
+        ExpensesGetDataDto result = this.expensesService.getDataByYear(token, year);
+
+        if(result.checkData()){
+            return ResponseEntity.ok(result);
+        }
+
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 }
