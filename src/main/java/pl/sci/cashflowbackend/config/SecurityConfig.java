@@ -37,6 +37,7 @@ class SecurityConfig{
                 .requestMatchers(HttpMethod.GET, "/api/expenses/get-data").authenticated()
                 .requestMatchers(HttpMethod.GET, "/api/expenses/get-data-year").authenticated()
                 .requestMatchers(HttpMethod.GET, "/api/expenses/get-data-day").authenticated()
+                .requestMatchers(HttpMethod.GET, "/api/expenses/get-data-week").authenticated()
                 .anyRequest()
                 .authenticated()
                 .and().csrf().disable()

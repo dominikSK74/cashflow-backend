@@ -13,6 +13,7 @@ import pl.sci.cashflowbackend.expenses.dto.ExpensesDto2;
 import pl.sci.cashflowbackend.expenses.dto.ExpensesGetDataDto;
 import pl.sci.cashflowbackend.jwt.Jwt;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 
 @RestController
@@ -90,12 +91,33 @@ public class ExpensesController {
     }
 
     @GetMapping("/api/expenses/get-data-day")
-    public ResponseEntity<ExpensesGetDataDto> getDataByMonth(@RequestHeader("Authorization") String token,
+    public ResponseEntity<ExpensesGetDataDto> getDataByDay(@RequestHeader("Authorization") String token,
                                                              @RequestParam("day") int day,
                                                              @RequestParam("month") int month,
                                                              @RequestParam("year") int year){
 
         ExpensesGetDataDto result = this.expensesService.getDataByDay(token, day, month, year);
+
+        if(result.checkData()){
+            return ResponseEntity.ok(result);
+        }
+
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
+    @GetMapping("/api/expenses/get-data-week")
+    public ResponseEntity<ExpensesGetDataDto> getDataByWeek(@RequestHeader("Authorization") String token,
+                                                            @RequestParam("firstDay") int firstDay,
+                                                            @RequestParam("firstMonth") int firstMonth,
+                                                            @RequestParam("firstYear") int firstYear,
+                                                            @RequestParam("lastDay") int lastDay,
+                                                            @RequestParam("lastMonth") int lastMonth,
+                                                            @RequestParam("lastYear") int lastYear){
+
+        LocalDate start = LocalDate.of(firstYear, firstMonth + 1, firstDay);
+        LocalDate end = LocalDate.of(lastYear, lastMonth + 1, lastDay);
+
+        ExpensesGetDataDto result = this.expensesService.getDataByWeek(token, start, end);
 
         if(result.checkData()){
             return ResponseEntity.ok(result);

@@ -241,6 +241,14 @@ public class ExpensesService {
         return getData(list);
     }
 
+    public ExpensesGetDataDto getDataByWeek(String token, LocalDate start, LocalDate end){
+        String userId = this.userService.findUserIdByUsername(jwt.extractUsername(token.substring(7)));
+        List<Expenses> list = expensesRepository.findByUserIdAndDateBetween(userId, start, end.plusDays(2));
+        list.forEach(e -> e.setDate(e.getDate().minusDays(1)));
+
+        return getData(list);
+    }
+
     public ExpensesGetDataDto getData(List<Expenses> list){
         Map<String, BigDecimal> map = new HashMap<>();
         ExpensesGetDataDto result = new ExpensesGetDataDto();
