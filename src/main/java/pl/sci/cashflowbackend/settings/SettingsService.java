@@ -65,4 +65,14 @@ public class SettingsService {
             this.settingsRepository.save(settings);
         }
     }
+
+    public boolean isEnglishLang(String userId){
+        Optional<Settings> settings = settingsRepository.findSettingsByUserId(userId);
+        if(settings.isPresent()){
+            if(settings.get().getLanguage() == Language.PL){
+                return false;
+            }
+        }
+        return true;
+    }
 }

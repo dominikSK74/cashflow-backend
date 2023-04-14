@@ -1,6 +1,7 @@
 package pl.sci.cashflowbackend.categories;
 
 import org.springframework.stereotype.Service;
+import pl.sci.cashflowbackend.settings.SettingsService;
 import pl.sci.cashflowbackend.user.UserService;
 
 import java.util.ArrayList;
@@ -12,26 +13,35 @@ public class CategoryService {
     private CategoriesRepository categoriesRepository;
     private PrivateCategoriesRepository privateCategoriesRepository;
     private UserService userService;
+    private SettingsService settingsService;
 
     public CategoryService(CategoriesRepository categoriesRepository,
                            PrivateCategoriesRepository privateCategoriesRepository,
-                           UserService userService) {
+                           UserService userService,
+                           SettingsService settingsService) {
         this.categoriesRepository = categoriesRepository;
         this.privateCategoriesRepository = privateCategoriesRepository;
         this.userService = userService;
+        this.settingsService = settingsService;
     }
 
     ArrayList<String> getAllCategories(String username) {
         ArrayList<String> list = new ArrayList<>();
         List<Categories> categories = new ArrayList<>();
         List<PrivateCategories> privateCategories = new ArrayList<>();
+        String userId = userService.findUserIdByUsername(username);
 
         categories = categoriesRepository.findAll();
-        categories.forEach(categories1 -> {
-            list.add(categories1.getName());
-        });
+        if(settingsService.isEnglishLang(userId)){
+            categories.forEach(categories1 -> {
+                list.add(categories1.getName());
+            });
+        }else{
+            categories.forEach(categories1 -> {
+                list.add(categories1.getNamePl());
+            });
+        }
 
-        String userId = userService.findUserIdByUsername(username);
         privateCategories = privateCategoriesRepository.findAllByUserId(userId);
         privateCategories.forEach(privateCategories1 -> {
             list.add(privateCategories1.getName());
@@ -54,6 +64,14 @@ public class CategoryService {
       return "0";
     }
 
+    public String findCategoryIdByCategoryNamePl(String name){
+        Optional<Categories> category = categoriesRepository.findCategoriesByNamePl(name);
+        if(category.isPresent()){
+            return category.get().getId();
+        }
+        return "0";
+    }
+
     public String findPrivateCategoryIdByPrivateCategoryName(String name){
         Optional<PrivateCategories> privateCategory = privateCategoriesRepository.findPrivateCategoriesByName(name);
         if(privateCategory.isPresent()){
@@ -70,6 +88,14 @@ public class CategoryService {
         return "0";
     }
 
+    public String findCategoryNamePlById(String id){
+        Optional<Categories> categories = categoriesRepository.findById(id);
+        if(categories.isPresent()){
+            return categories.get().getNamePl();
+        }
+        return "0";
+    }
+
     public String findPrivateCategoryNameById(String id){
         Optional<PrivateCategories> privateCategories = privateCategoriesRepository.findById(id);
         if(privateCategories.isPresent()){
@@ -80,6 +106,11 @@ public class CategoryService {
 
     public boolean categoryIsExistByName(String categoryName){
         Optional<Categories> categories = categoriesRepository.findCategoriesByName(categoryName);
+        return categories.isPresent();
+    }
+
+    public boolean categoryIsExistByNamePl(String categoryName){
+        Optional<Categories> categories = categoriesRepository.findCategoriesByNamePl(categoryName);
         return categories.isPresent();
     }
 }

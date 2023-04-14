@@ -11,7 +11,10 @@ public class Categories {
     private String id;
     private String name;
 
-    public Categories(String name) {
+    private String namePl;
+
+    public Categories(String name, String namePl) {
         this.name = name;
+        this.namePl = namePl;
     }
 }

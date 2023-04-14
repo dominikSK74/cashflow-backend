@@ -41,9 +41,13 @@ public class ExpensesController {
     }
 
     @PostMapping("/api/expenses/upload-image")
-    public ResponseEntity<ArrayList<ExpensesDto2>> uploadImage(@RequestParam("image") MultipartFile file) throws Exception {
+    public ResponseEntity<ArrayList<ExpensesDto2>> uploadImage(@RequestHeader("Authorization") String token,
+                                                               @RequestParam("image") MultipartFile file) throws Exception {
 
-        ArrayList<ExpensesDto2> expensesDto2ArrayList = expensesService.uploadImage(file);
+        String bearer = token.substring(7);
+        String username = jwt.extractUsername(bearer);
+
+        ArrayList<ExpensesDto2> expensesDto2ArrayList = expensesService.uploadImage(file, username);
 
         if(expensesDto2ArrayList.isEmpty()){
             return ResponseEntity.status(HttpStatus.CONFLICT).build();

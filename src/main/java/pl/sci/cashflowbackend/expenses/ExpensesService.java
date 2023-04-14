@@ -12,6 +12,7 @@ import pl.sci.cashflowbackend.expenses.dto.ExpensesDto2;
 import pl.sci.cashflowbackend.expenses.dto.ExpensesGetDataDto;
 import pl.sci.cashflowbackend.jwt.Jwt;
 import pl.sci.cashflowbackend.products.ProductsService;
+import pl.sci.cashflowbackend.settings.SettingsService;
 import pl.sci.cashflowbackend.shops.ShopsService;
 import pl.sci.cashflowbackend.user.UserService;
 import javax.imageio.ImageIO;
@@ -21,10 +22,7 @@ import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAdjusters;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -37,19 +35,22 @@ public class ExpensesService {
     private ShopsService shopsService;
     private ProductsService productsService;
     private Jwt jwt;
+    private SettingsService settingsService;
 
     public ExpensesService(UserService userService,
                            CategoryService categoryService,
                            ExpensesRepository expensesRepository,
                            ShopsService shopsService,
                            ProductsService productsService,
-                           Jwt jwt) {
+                           Jwt jwt,
+                           SettingsService settingsService) {
         this.userService = userService;
         this.categoryService = categoryService;
         this.expensesRepository = expensesRepository;
         this.shopsService = shopsService;
         this.productsService = productsService;
         this.jwt = jwt;
+        this.settingsService = settingsService;
     }
 
     boolean addExpenses(String username, ArrayList<ExpensesDto> listDto){
@@ -59,7 +60,14 @@ public class ExpensesService {
         ArrayList<Expenses> listExpenses = new ArrayList<>();
 
         listDto.forEach(element -> {
-            String categoryId = categoryService.findCategoryIdByCategoryName(element.getCategories());
+
+            String categoryId;
+            if(this.settingsService.isEnglishLang(userId)){
+                categoryId = categoryService.findCategoryIdByCategoryName(element.getCategories());
+            }else{
+                categoryId = categoryService.findCategoryIdByCategoryNamePl(element.getCategories());
+            }
+
             String privateCategoryId = categoryService.findPrivateCategoryIdByPrivateCategoryName(element.getCategories());
             LocalDate date = LocalDate.parse(element.getDate(), formatter).plusDays(1);
             BigDecimal cost = new BigDecimal(element.getCost());
@@ -83,7 +91,9 @@ public class ExpensesService {
         return true;
     }
 
-    public ArrayList<ExpensesDto2> uploadImage(MultipartFile file) throws IOException {
+    public ArrayList<ExpensesDto2> uploadImage(MultipartFile file, String username) throws IOException {
+
+        String userId = this.userService.findUserIdByUsername(username);
 
         // GET RECEIPT LINES
         ArrayList<String> lines = doOCR(file);
@@ -102,7 +112,7 @@ public class ExpensesService {
         }
 
         // CATEGORY SEARCH
-        expensesArrayList = productsService.getPossibleCategories(expensesArrayList);
+        expensesArrayList = productsService.getPossibleCategories(expensesArrayList, userId);
 
         // SET DATE
         String finalDate = date.toString();
@@ -218,7 +228,7 @@ public class ExpensesService {
         List<Expenses> list = expensesRepository.findByUserIdAndDateBetween(userId, start, end.plusDays(2));
         list.forEach(e -> e.setDate(e.getDate().minusDays(1)));
 
-        return getData(list);
+        return getData(list, userId);
     }
 
     public ExpensesGetDataDto getDataByYear(String token, int year){
@@ -229,7 +239,7 @@ public class ExpensesService {
         List<Expenses> list = expensesRepository.findByUserIdAndDateBetween(userId, start, end.plusDays(2));
         list.forEach(e -> e.setDate(e.getDate().minusDays(1)));
 
-        return getData(list);
+        return getData(list, userId);
     }
 
     public ExpensesGetDataDto getDataByDay(String token, int day, int month, int year){
@@ -238,7 +248,7 @@ public class ExpensesService {
         List<Expenses> list = expensesRepository.findByUserIdAndDate(userId, date.plusDays(1));
         list.forEach(e -> e.setDate(e.getDate().minusDays(1)));
 
-        return getData(list);
+        return getData(list, userId);
     }
 
     public ExpensesGetDataDto getDataByWeek(String token, LocalDate start, LocalDate end){
@@ -246,19 +256,23 @@ public class ExpensesService {
         List<Expenses> list = expensesRepository.findByUserIdAndDateBetween(userId, start, end.plusDays(2));
         list.forEach(e -> e.setDate(e.getDate().minusDays(1)));
 
-        return getData(list);
+        return getData(list, userId);
     }
 
-    public ExpensesGetDataDto getData(List<Expenses> list){
+    public ExpensesGetDataDto getData(List<Expenses> list, String userId){
         Map<String, BigDecimal> map = new HashMap<>();
         ExpensesGetDataDto result = new ExpensesGetDataDto();
-
         list.forEach(object -> {
             String categoryName;
+
             if(object.getCategoryId().equals("0")){
                 categoryName = this.categoryService.findPrivateCategoryNameById(object.getPrivateCategoryId());
             }else {
-                categoryName = this.categoryService.findCategoryNameById(object.getCategoryId());
+                if(this.settingsService.isEnglishLang(userId)){
+                    categoryName = this.categoryService.findCategoryNameById(object.getCategoryId());
+                }else{
+                    categoryName = this.categoryService.findCategoryNamePlById(object.getCategoryId());
+                }
             }
 
             if(map.containsKey(categoryName)){
