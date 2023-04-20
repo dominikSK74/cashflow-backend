@@ -29,7 +29,9 @@ public class CashflowBackendApplication {
 
 
 //        ShopsRepository repo3 = context.getBean(ShopsRepository.class);
-//
+////
+//        Shops biedronka = new Shops("Jeronimo Martins Polska S. A.");
+//        repo3.insert(biedronka);
 //        Shops lidl = new Shops("lidl");
 //        Shops auchan = new Shops("auchan");
 //
@@ -39,6 +41,14 @@ public class CashflowBackendApplication {
 
 //        CategoriesRepository repo = context.getBean(CategoriesRepository.class);
 //        PrivateCategoriesRepository repo2 = context.getBean(PrivateCategoriesRepository.class);
+
+
+//        Categories olej = new Categories("GRAIN PRODUCTS", "PRODUKTY ZBOŻOWE");
+//        Categories olej2 = new Categories("SPICES", "PRZYPRAWY");
+//        Categories olej3 = new Categories("OTHER", "INNE");
+//        repo.insert(olej);
+//        repo.insert(olej2);
+//        repo.insert(olej3);
 //
 //        //Dodanie kategorii
 //            Categories cat1 = new Categories("angielska nazwa","Produkty zbożowe");

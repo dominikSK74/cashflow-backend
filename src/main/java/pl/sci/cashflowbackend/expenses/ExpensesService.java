@@ -14,6 +14,7 @@ import pl.sci.cashflowbackend.jwt.Jwt;
 import pl.sci.cashflowbackend.products.ProductsService;
 import pl.sci.cashflowbackend.settings.SettingsService;
 import pl.sci.cashflowbackend.shops.ShopsService;
+import pl.sci.cashflowbackend.shops.templates.Biedronka;
 import pl.sci.cashflowbackend.user.UserService;
 import javax.imageio.ImageIO;
 import java.io.IOException;
@@ -107,6 +108,9 @@ public class ExpensesService {
             expensesArrayList = lidl(lines);
         }else if(shop.equals("auchan")){
             System.out.println("auchan");
+        }else if(shop.equals("Jeronimo Martins Polska S. A.")){
+            date = Biedronka.getDate(lines);
+            expensesArrayList = Biedronka.getProducts(lines);
         }else{
             return null;
         }
@@ -151,7 +155,7 @@ public class ExpensesService {
 
         for(int i = 0; i<lines.size(); i++){
             for(int j = 0; j<shops.size(); j++){
-                if(lines.get(i).toLowerCase().contains(shops.get(j))){
+                if(lines.get(i).toLowerCase().contains(shops.get(j).toLowerCase())){
                     return shops.get(j);
                 }
             }
