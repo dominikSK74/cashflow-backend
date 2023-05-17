@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import pl.sci.cashflowbackend.expenses.dto.ExpensesDto;
 import pl.sci.cashflowbackend.expenses.dto.ExpensesDto2;
+import pl.sci.cashflowbackend.expenses.dto.ExpensesDto3;
 import pl.sci.cashflowbackend.expenses.dto.ExpensesGetDataDto;
 import pl.sci.cashflowbackend.jwt.Jwt;
 
@@ -128,5 +129,42 @@ public class ExpensesController {
         }
 
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
+    @GetMapping("/api/expenses/get-all-user-expenses")
+    public ResponseEntity<ArrayList<ExpensesDto3>> getAllUserExpenses(@RequestHeader("Authorization") String token){
+
+        return ResponseEntity.ok(this.expensesService.getAllUserExpenses(token));
+    }
+
+    @DeleteMapping("/api/expenses/delete-expense/{expenseId}")
+    public ResponseEntity<?> deleteExpense(@RequestHeader("Authorization") String token,
+                                           @PathVariable String expenseId){
+
+        if(this.expensesService.deleteExpense(expenseId, token)){
+            return ResponseEntity.ok().build();
+        }
+
+        return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).build();
+    }
+
+    @GetMapping("/api/expenses/get-expense-by-id")
+    public ResponseEntity<ExpensesDto3> getExpenseById(@RequestHeader("Authorization") String token,
+                                                       @RequestParam("expenseId") String expenseId){
+
+        ExpensesDto3 expensesDto3 = this.expensesService.getExpenseById(expenseId, token);
+        if(expensesDto3 == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+        return ResponseEntity.ok(expensesDto3);
+    }
+
+    @PutMapping("/api/expenses/edit-expense")
+    public ResponseEntity<?> editExpense(@RequestHeader("Authorization") String token,
+                                         @RequestBody ExpensesDto3 expensesDto3){
+        if( this.expensesService.editExpense(expensesDto3, token)){
+            return ResponseEntity.ok().build();
+        }
+        return ResponseEntity.status(HttpStatus.CONFLICT).build();
     }
 }

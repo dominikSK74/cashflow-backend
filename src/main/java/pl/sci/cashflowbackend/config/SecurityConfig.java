@@ -1,5 +1,6 @@
 package pl.sci.cashflowbackend.config;
 
+import org.json.HTTP;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -38,6 +39,10 @@ class SecurityConfig{
                 .requestMatchers(HttpMethod.GET, "/api/expenses/get-data-year").authenticated()
                 .requestMatchers(HttpMethod.GET, "/api/expenses/get-data-day").authenticated()
                 .requestMatchers(HttpMethod.GET, "/api/expenses/get-data-week").authenticated()
+                .requestMatchers(HttpMethod.GET, "/api/expenses/get-all-user-expenses").authenticated()
+                .requestMatchers(HttpMethod.DELETE, "/api/expenses/delete-expense/").authenticated()
+                .requestMatchers(HttpMethod.GET, "/api/expenses/get-expense-by-id").authenticated()
+                .requestMatchers(HttpMethod.PUT, "/api/expenses/edit-expense").authenticated()
                 .anyRequest()
                 .authenticated()
                 .and().csrf().disable()

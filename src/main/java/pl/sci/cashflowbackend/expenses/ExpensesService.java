@@ -9,6 +9,7 @@ import org.springframework.web.multipart.MultipartFile;
 import pl.sci.cashflowbackend.categories.CategoryService;
 import pl.sci.cashflowbackend.expenses.dto.ExpensesDto;
 import pl.sci.cashflowbackend.expenses.dto.ExpensesDto2;
+import pl.sci.cashflowbackend.expenses.dto.ExpensesDto3;
 import pl.sci.cashflowbackend.expenses.dto.ExpensesGetDataDto;
 import pl.sci.cashflowbackend.jwt.Jwt;
 import pl.sci.cashflowbackend.products.ProductsService;
@@ -299,5 +300,128 @@ public class ExpensesService {
         result.setPrices(prices);
 
         return result;
+    }
+
+    public ArrayList<ExpensesDto3> getAllUserExpenses(String token){
+
+        String bearer = token.substring(7);
+        String username = jwt.extractUsername(bearer);
+        String userId = this.userService.findUserIdByUsername(username);
+        ArrayList<ExpensesDto3> expenses = new ArrayList<>();
+
+        this.expensesRepository.findByUserId(userId).forEach(exp ->{
+
+            String category;
+
+            if(exp.getPrivateCategoryId().equals("0")){
+                if(this.settingsService.isEnglishLang(userId)){
+                    category = this.categoryService.findCategoryNameById(exp.getCategoryId());
+                }else{
+                    category = this.categoryService.findCategoryNamePlById(exp.getCategoryId());
+                }
+            }else{
+                category = this.categoryService.findPrivateCategoryNameById(exp.getPrivateCategoryId());
+            }
+
+            expenses.add(new ExpensesDto3(exp.getId(), exp.getName(), exp.getCost().toString(), category,
+                    exp.getDate().minusDays(1).toString()));
+        });
+
+        return expenses;
+    }
+
+    public boolean deleteExpense(String expenseId, String token){
+
+        String bearer = token.substring(7);
+        String username = jwt.extractUsername(bearer);
+        String userId = this.userService.findUserIdByUsername(username);
+
+        Optional<Expenses> expenses = this.expensesRepository.findByIdAndUserId(expenseId, userId);
+
+        if(expenses.isPresent()){
+            this.expensesRepository.deleteById(expenseId);
+            return true;
+        }
+            return false;
+    }
+
+    public ExpensesDto3 getExpenseById(String expenseId, String token){
+        String bearer = token.substring(7);
+        String username = jwt.extractUsername(bearer);
+        String userId = this.userService.findUserIdByUsername(username);
+        Optional<Expenses> expensesOptional = this.expensesRepository.findById(expenseId);
+
+        if(expensesOptional.isPresent()){
+            String category;
+
+            if(expensesOptional.get().getPrivateCategoryId().equals("0")){
+                if(this.settingsService.isEnglishLang(userId)){
+                    category = this.categoryService.findCategoryNameById(expensesOptional.get().getCategoryId());
+                }else{
+                    category = this.categoryService.findCategoryNamePlById(expensesOptional.get().getCategoryId());
+                }
+            }else{
+                category = this.categoryService.findPrivateCategoryNameById(expensesOptional.get().getPrivateCategoryId());
+            }
+
+            ExpensesDto3 expensesDto3 = new ExpensesDto3(
+                    expensesOptional.get().getId(),
+                    expensesOptional.get().getName(),
+                    expensesOptional.get().getCost().toString(),
+                    category,
+                    expensesOptional.get().getDate().toString()
+            );
+
+            return expensesDto3;
+        }else{
+            return null;
+        }
+    }
+
+    public boolean editExpense(ExpensesDto3 expensesDto3, String token){
+        String bearer = token.substring(7);
+        String username = jwt.extractUsername(bearer);
+        String userId = this.userService.findUserIdByUsername(username);
+
+        Optional<Expenses> expenses = this.expensesRepository.findByIdAndUserId(expensesDto3.getId(), userId);
+        Expenses finalExpense = new Expenses();
+
+        if(expenses.isPresent()){
+            finalExpense.setId(expenses.get().getId());
+            finalExpense.setUserId(userId);
+            finalExpense.setCost(new BigDecimal(expensesDto3.getCost()));
+            finalExpense.setName(expensesDto3.getName());
+
+
+            String categoryName = expensesDto3.getCategories();
+
+            String category = categoryService.findPrivateCategoryIdByPrivateCategoryName(categoryName);
+
+            if(category.equals("0")){
+                if(this.settingsService.isEnglishLang(userId)){
+                    category = this.categoryService.findCategoryIdByCategoryName(categoryName);
+                }else{
+                    category = this.categoryService.findCategoryIdByCategoryNamePl(categoryName);
+                }
+                finalExpense.setCategoryId(category);
+                finalExpense.setPrivateCategoryId("0");
+            }else{
+                finalExpense.setCategoryId("0");
+                finalExpense.setPrivateCategoryId(category);
+            }
+
+
+            finalExpense.setDate(LocalDate.parse(expensesDto3.getDate().substring(0,10)));
+
+            if(expenses.get().getDate().minusDays(1).toString().equals(LocalDate.parse(expensesDto3.getDate().substring(0, 10)).toString())){
+                finalExpense.setDate(LocalDate.parse(expensesDto3.getDate().substring(0, 10)).plusDays(1));
+            }else{
+                finalExpense.setDate(LocalDate.parse(expensesDto3.getDate().substring(0, 10)).plusDays(2));
+            }
+
+            this.expensesRepository.save(finalExpense);
+            return true;
+        }
+        return false;
     }
 }
